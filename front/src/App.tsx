@@ -118,7 +118,7 @@ class App extends React.Component {
       <div className="App">
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">欢迎来到Promise.all的学习实例</h1>
+          <h1 className="App-title">欢迎来到Promise.all的学习Demo</h1>
         </header>
         <Card title="概览仪表盘" loading={loading}>
           <Card.Grid style={this.gridStyle}>
