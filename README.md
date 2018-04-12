@@ -1,0 +1,2 @@
+# learnReactPromiseAll
+在react中基于Promise.all带调用fetch发起请求渲染数据的例子
