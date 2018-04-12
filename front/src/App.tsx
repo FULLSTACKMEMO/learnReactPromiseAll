@@ -79,6 +79,27 @@ class App extends React.Component {
   }
 
   /**
+   * 简单封装一下fetch的get方法, 并且Promise化.
+   * 此方法与new Bluebird方法比相对简洁
+   * 因为到在我们的事例中是用不到reject的.
+   * 一定要注意下面的return, 一个都不能少.
+   * @param url api的后半部分url
+   */
+  public getResBodyByResolve(url: string) {
+    return Bluebird.resolve().then(() => {
+      return fetch(this.apiRoot + url).then(async res => {
+        // 使用async/await方式避免then的调用
+        const result = await res.json();
+        if (result.code === 0) {
+          return result.data;
+        } else {
+          return {};
+        }
+      });
+    });
+  }
+
+  /**
    * 使用PromiseAll方法
    * 实现等待多个接口查询完毕后再显示Card的结果
    */
@@ -108,8 +129,36 @@ class App extends React.Component {
     });
   }
 
+  public getSurveyByResolve() {
+    // 这不用await的原因是因为await会阻塞这四个请求
+    // 也就是说如果用await就需要前一个请求的接口得到结果之后才会请求下一个接口
+    // 而使用PromiseAll就能按照请求书写顺序发送四个请求(非并发)
+    // 并同时等待四个请求有了回复才进行下一步操作
+    // 值得注意的是, 这里的四个请求的发起不是并发的
+    // 但是每个请求都不需要等待上一个请求完毕后才执行下一个请求
+    const userSurveyPro = this.getResBodyByResolve('/api/user-survey');
+    const roleSurveyPro = this.getResBodyByResolve('/api/role-survey');
+    const taskSurveyPro = this.getResBodyByResolve('/api/task-survey');
+    const projectSurveyPro = this.getResBodyByResolve('/api/project-survey');
+
+    // all方法里需要传入数组, 即使只传一个的时候也要包在数组里
+    // 当然, 如果只传一个的话, 就不需要用all了
+    // 传入数组里的对象必须为Promise对象
+    Bluebird.all([userSurveyPro, roleSurveyPro, taskSurveyPro, projectSurveyPro]).then(surveyList => {
+      this.setState({
+        userData: surveyList[0],
+        roleData: surveyList[1],
+        taskData: surveyList[2],
+        projectData: surveyList[3],
+        loading: false
+      });
+    });
+  }
+
   componentDidMount() {
     this.getSurvey();
+    // 此方法仅是上面方法的简洁版
+    // this.getSurveyByResolve();
   }
 
   render() {
