@@ -86,8 +86,8 @@ class App extends React.Component {
    * @param url api的后半部分url
    */
   public getResBodyByResolve(url: string) {
-    return Bluebird.resolve().then(() => {
-      return fetch(this.apiRoot + url).then(async res => {
+    return Bluebird.resolve(
+      fetch(this.apiRoot + url).then(async res => {
         // 使用async/await方式避免then的调用
         const result = await res.json();
         if (result.code === 0) {
@@ -95,8 +95,8 @@ class App extends React.Component {
         } else {
           return {};
         }
-      });
-    });
+      })
+    );
   }
 
   /**
